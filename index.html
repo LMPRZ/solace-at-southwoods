@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Solace at Southwoods – Your Little Escape at Southwoods</title>
+<meta name="description" content="Cozy studio condo staycation at Southwoods. Check available dates, then message us to book.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EFEAE3; --surface:#F8F5F1; --ink:#2F2A26; --muted:#6F675F; --line:#DDD5CB;
+  --accent:#5B6753; --accent-ink:#FFFFFF;
+  --avail-bg:#DCE8D5; --avail-ink:#2F4A2A;
+  --book-bg:#EBCFC9; --book-ink:#7A2E25;
+  --off-bg:#E4E0DA; --off-ink:#8A837B;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#1F1C19; --surface:#292521; --ink:#F1ECE5; --muted:#A99F94; --line:#3A352F;
+    --accent:#A9B89F; --accent-ink:#1F1C19;
+    --avail-bg:#2F4029; --avail-ink:#CBE3C0;
+    --book-bg:#4A2824; --book-ink:#F0C4BD;
+    --off-bg:#33302C; --off-ink:#8A8279; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1F1C19; --surface:#292521; --ink:#F1ECE5; --muted:#A99F94; --line:#3A352F;
+  --accent:#A9B89F; --accent-ink:#1F1C19;
+  --avail-bg:#2F4029; --avail-ink:#CBE3C0; --book-bg:#4A2824; --book-ink:#F0C4BD;
+  --off-bg:#33302C; --off-ink:#8A8279; color-scheme:dark;
+}
+html{scroll-behavior:smooth;scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 "DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3{font-family:"Fraunces",Georgia,"Times New Roman",serif;font-weight:300;line-height:1.1;margin:0}
+section{padding:clamp(56px,10vw,104px) 20px}
+.wrap{max-width:960px;margin:0 auto}
+.narrow{max-width:520px;margin:0 auto}
+h2{font-size:clamp(2rem,6vw,2.9rem);margin-bottom:12px}
+.lead{color:var(--muted);max-width:52ch;margin:0 0 32px}
+.btn{display:inline-block;background:var(--accent);color:var(--accent-ink);text-decoration:none;font:600 1rem "DM Sans",sans-serif;padding:16px 32px;border-radius:999px;border:0;cursor:pointer;transition:transform .15s,opacity .15s}
+.btn:hover{opacity:.9;transform:translateY(-1px)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+
+/* Hero */
+.hero{min-height:88vh;min-height:88svh;display:flex;align-items:center;padding-top:72px}
+.hero h1{font-size:clamp(3.2rem,13vw,7.2rem);letter-spacing:-.02em;max-width:9ch}
+.hero .tag{font-family:"Fraunces",Georgia,serif;font-style:italic;font-weight:300;font-size:clamp(1.3rem,4vw,1.9rem);color:var(--muted);margin:18px 0 20px}
+.hero p{max-width:46ch;margin:0 0 36px}
+
+/* Calendar */
+#availability{background:var(--surface)}
+.cal{background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:clamp(14px,4vw,28px);max-width:560px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cal-head h3{font-size:1.6rem}
+.nav{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:1.2rem;cursor:pointer}
+.nav:disabled{opacity:.3;cursor:default}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.dow{font-size:.75rem;color:var(--muted);text-align:center;padding:4px 0;font-weight:500}
+.day{aspect-ratio:1;min-height:40px;border:2px solid transparent;border-radius:12px;font:500 .95rem "DM Sans",sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.day.available{background:var(--avail-bg);color:var(--avail-ink)}
+.day.booked{background:var(--book-bg);color:var(--book-ink)}
+.day.unavailable,.day.past{background:var(--off-bg);color:var(--off-ink)}
+.day.past{opacity:.45;cursor:default;background:transparent}
+.day.today{border-color:var(--ink);font-weight:600}
+.day.selected{box-shadow:0 0 0 3px var(--accent)}
+.blank{visibility:hidden}
+.legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin:18px 0 0;padding:0;list-style:none;font-size:.9rem;color:var(--muted)}
+.legend .t{display:inline-block;width:14px;height:14px;border:2px solid var(--ink);border-radius:5px;vertical-align:-2px;margin-right:6px}
+.msg{margin-top:18px;min-height:3.4em;padding:14px 16px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font-size:.98rem}
+.msg a{color:var(--accent);font-weight:600}
+.msg.ok{border-color:var(--avail-ink)}.msg.no{border-color:var(--book-ink)}
+
+.admin{background:var(--surface);border:1px dashed var(--accent);border-radius:14px;padding:12px 14px;margin-bottom:16px;font-size:.9rem}
+.admin p{margin:0 0 10px}
+.admin .btn{padding:10px 22px;font-size:.95rem}
+.admin .btn:disabled{opacity:.4;cursor:default}
+#adminNote{margin-left:10px;color:var(--muted)}
+
+/* Rates */
+.rates{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.rate{border-top:1px solid var(--ink);padding-top:16px}
+.rate .d{color:var(--muted)}
+.rate .p{font-family:"Fraunces",Georgia,serif;font-weight:300;font-size:clamp(2.4rem,8vw,3.4rem);line-height:1.1}
+.rate .p small{font:400 1rem "DM Sans",sans-serif;color:var(--muted)}
+
+/* Features */
+#features{background:var(--surface)}
+.feat{list-style:none;margin:0;padding:0;display:grid;gap:12px 32px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.feat li{display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--line)}
+.feat svg{flex:none;width:28px;height:28px;stroke:var(--accent);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* Book */
+.book{text-align:center}
+.book h2{font-size:clamp(2.2rem,7vw,3.6rem)}
+.book .lead{margin:0 auto 32px}
+footer{text-align:center;color:var(--muted);font-size:.85rem;padding:0 20px 40px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>Solace at Southwoods</h1>
+    <p class="tag">Your Little Escape at Southwoods</p>
+    <p>A calm, cozy studio made for slowing down. Pick your dates, see if we’re free, then send us a message and we’ll take care of the rest.</p>
+    <a class="btn" href="#availability" id="checkBtn">Check Availability</a>
+  </div>
+</header>
+
+<section id="availability">
+  <div class="wrap">
+    <h2>Availability</h2>
+    <p class="lead">Tap a date to see if it’s open. Bookings are confirmed by message only.</p>
+    <div class="cal">
+      <div class="cal-head">
+        <button class="nav" id="prev" aria-label="Previous month">&#8249;</button>
+        <h3 id="monthLabel" aria-live="polite"></h3>
+        <button class="nav" id="next" aria-label="Next month">&#8250;</button>
+      </div>
+      <div class="grid" id="dows"></div>
+      <div class="grid" id="days" role="grid"></div>
+      <ul class="legend">
+        <li>🟢 Available</li><li>🔴 Booked</li><li>⚪ Unavailable</li>
+        <li><span class="t"></span>Today</li>
+      </ul>
+      <div class="msg" id="msg" role="status" aria-live="polite">Select a date to check availability.</div>
+    </div>
+  </div>
+</section>
+
+<section id="rates">
+  <div class="wrap">
+    <h2>Rates</h2>
+    <p class="lead">Simple nightly rates for the whole studio.</p>
+    <div class="rates">
+      <div class="rate"><div class="d">Monday – Thursday</div><div class="p">₱1,899 <small>per night</small></div></div>
+      <div class="rate"><div class="d">Friday – Sunday</div><div class="p">₱2,199 <small>per night</small></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <h2>Room features</h2>
+    <p class="lead">Everything you need for a comfortable stay.</p>
+    <ul class="feat">
+      <li><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.2a3 3 0 0 1 0 5.6M18 14.4c1.8.9 3 2.7 3 5.6"/></svg>Cozy studio unit for up to 2 guests</li>
+      <li><svg viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>55-inch TV</li>
+      <li><svg viewBox="0 0 24 24"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.6 16a5 5 0 0 1 6.8 0"/><circle cx="12" cy="19.5" r=".8"/></svg>Fast 600 Mbps Wi-Fi</li>
+      <li><svg viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2"/><path d="M6 10h12M9 6v1.5M9 13v3"/></svg>Refrigerator</li>
+      <li><svg viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><rect x="5.5" y="9" width="9" height="6" rx="1"/><path d="M18 9.5v.01M18 12v.01M18 14.5v.01"/></svg>Microwave</li>
+      <li><svg viewBox="0 0 24 24"><path d="M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM16 10h1.5a2.5 2.5 0 0 1 0 5H16M8 3c0 1.5 1 1.5 1 3M12 3c0 1.5 1 1.5 1 3"/></svg>Coffee maker</li>
+      <li><svg viewBox="0 0 24 24"><path d="M3 9h18M5 9v11M19 9v11M7 9V5h10v4"/></svg>Dining area</li>
+    </ul>
+  </div>
+</section>
+
+<section class="book" id="book">
+  <div class="narrow">
+    <h2>Ready for your little escape?</h2>
+    <p class="lead">Found a date you like? Send us a message with your dates and we’ll confirm your stay.</p>
+    <a class="btn" id="bookBtn" href="#" target="_blank" rel="noopener">Message Us to Book</a>
+  </div>
+</section>
+<footer>© <span id="yr"></span> Solace at Southwoods</footer>
+
+<script id="main-script">
+/* =====================================================================
+   OWNER SETTINGS – the only part you need to edit
+   ---------------------------------------------------------------------
+   Dates are written as "YYYY-MM-DD" and mean the NIGHT of that date.
+   Example: a guest staying Nov 20 to Nov 22 occupies the nights of
+   Nov 20 and Nov 21, so list "2026-11-20" and "2026-11-21".
+   Any date not listed is shown as Available.
+   ===================================================================== */
+const SETTINGS = {
+  // Where "Message Us to Book" goes. Examples:
+  //   Messenger: "https://m.me/YourPageName"
+  //   Viber:     "viber://chat?number=%2B639171234567"
+  //   WhatsApp:  "https://wa.me/639171234567"
+  //   Instagram: "https://ig.me/m/yourhandle"
+  messageLink: "https://m.me/YourPageName",
+
+  // BOOKED DATES (shown in red). Add or delete lines here, one line per booking.
+  //   One night:               "2026-11-14"
+  //   Several nights in a row: "2026-11-27 to 2026-11-29"  (first and last night)
+  // Keep the quotes and the comma at the end of each line.
+  booked: [
+    "2026-11-14",
+    "2026-11-15",
+    "2026-11-27 to 2026-11-29",
+    "2026-12-05",
+    "2026-12-24 to 2026-12-26",
+    "2026-12-30 to 2027-01-02",
+  ],
+
+  // Dates you are NOT accepting guests (maintenance, personal use…) (shown in grey)
+  // Same format as the booked list above.
+  unavailable: [
+    "2026-11-22",
+    "2026-12-10 to 2026-12-12",
+  ],
+
+  // How many months ahead guests can browse
+  monthsAhead: 11,
+};
+/* =============================  END SETTINGS  ============================= */
+
+(function(){
+  const pad = n => String(n).padStart(2,"0");
+  const key = (y,m,d) => y+"-"+pad(m+1)+"-"+pad(d);
+  function expand(list){
+    const s = new Set();
+    list.forEach(item => {
+      const [a, b = a] = item.trim().split(/\s+to\s+/i);
+      const e = new Date(b+"T00:00:00"); 
+      for(let d=new Date(a+"T00:00:00"); d<=e; d.setDate(d.getDate()+1)){
+        s.add(key(d.getFullYear(), d.getMonth(), d.getDate()));
+      }
+    });
+    return s;
+  }
+  const booked = expand(SETTINGS.booked);
+  const off = expand(SETTINGS.unavailable);
+
+  const now = new Date();
+  const todayKey = key(now.getFullYear(), now.getMonth(), now.getDate());
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  let cur = new Date(start);
+  let selected = null;
+
+  const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const $ = id => document.getElementById(id);
+  const msg = $("msg");
+
+  $("dows").innerHTML = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d => '<div class="dow">'+d+'</div>').join("");
+
+  function status(k){
+    if(k < todayKey) return "past";
+    if(booked.has(k)) return "booked";
+    if(off.has(k)) return "unavailable";
+    return "available";
+  }
+
+  function render(){
+    const y = cur.getFullYear(), m = cur.getMonth();
+    $("monthLabel").textContent = MONTHS[m] + " " + y;
+    const first = new Date(y,m,1).getDay();
+    const total = new Date(y,m+1,0).getDate();
+    let html = "";
+    for(let i=0;i<first;i++) html += '<div class="blank"></div>';
+    for(let d=1; d<=total; d++){
+      const k = key(y,m,d), s = status(k);
+      const label = {available:"available",booked:"booked",unavailable:"unavailable",past:"past date"}[s];
+      html += '<button type="button" class="day '+s+(k===todayKey?" today":"")+(k===selected?" selected":"")+
+        '" data-k="'+k+'" data-s="'+s+'"'+(s==="past"?" disabled":"")+
+        ' aria-label="'+MONTHS[m]+" "+d+", "+label+'">'+d+'</button>';
+    }
+    $("days").innerHTML = html;
+    $("prev").disabled = cur <= start;
+    const max = new Date(start.getFullYear(), start.getMonth()+SETTINGS.monthsAhead, 1);
+    $("next").disabled = cur >= max;
+  }
+
+  $("prev").onclick = () => { cur.setMonth(cur.getMonth()-1); render(); };
+  $("next").onclick = () => { cur.setMonth(cur.getMonth()+1); render(); };
+
+  $("days").addEventListener("click", e => {
+    const b = e.target.closest(".day"); if(!b) return;
+    if(admin){ cycle(b.dataset.k); return; }
+    selected = b.dataset.k;
+    const s = b.dataset.s;
+    msg.className = "msg " + (s==="available" ? "ok" : "no");
+    if(s==="available"){
+      msg.innerHTML = 'This date is available! <a href="'+SETTINGS.messageLink+'" target="_blank" rel="noopener">Message us to book your stay.</a>';
+    } else if(s==="booked"){
+      msg.textContent = "Sorry, this date is already booked.";
+    } else {
+      msg.textContent = "Sorry, this date is unavailable.";
+    }
+    render();
+  });
+
+  $("bookBtn").href = SETTINGS.messageLink;
+  $("yr").textContent = now.getFullYear();
+  render();
+
+  /* ---- Owner mode: appears only for the page owner on the Claude-hosted link ---- */
+  let admin = false;
+  function nextDay(k){ const d = new Date(k+"T00:00:00"); d.setDate(d.getDate()+1); return key(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function toList(set){
+    const ks = [...set].sort(), out = []; let i = 0;
+    while(i < ks.length){
+      let j = i;
+      while(j+1 < ks.length && nextDay(ks[j]) === ks[j+1]) j++;
+      out.push(i === j ? ks[i] : ks[i]+" to "+ks[j]);
+      i = j+1;
+    }
+    return out;
+  }
+  function cycle(k){
+    if(booked.has(k)){ booked.delete(k); off.add(k); }
+    else if(off.has(k)){ off.delete(k); }
+    else { booked.add(k); }
+    $("saveBtn").disabled = false;
+    $("adminNote").textContent = "Unsaved changes";
+    render();
+  }
+  async function save(){
+    const note = $("adminNote");
+    try{
+      const art = await claude.use("artifact");
+      if(!art){ note.textContent = "Saving is not available here."; return; }
+      note.textContent = "Saving..."; $("saveBtn").disabled = true;
+      const fmt = l => "[\n" + l.map(x => '    "'+x+'",').join("\n") + "\n  ]";
+      let src = $("main-script").textContent;
+      src = src.replace(/booked: \[[\s\S]*?\]/, "booked: " + fmt(toList(booked)));
+      src = src.replace(/unavailable: \[[\s\S]*?\]/, "unavailable: " + fmt(toList(off)));
+      const c = document.documentElement.cloneNode(true);
+      c.querySelector("#main-script").textContent = src;
+      ["days","dows","monthLabel"].forEach(id => { c.querySelector("#"+id).innerHTML = ""; });
+      const m = c.querySelector("#msg"); m.className = "msg"; m.textContent = "Select a date to check availability.";
+      c.querySelector("#yr").textContent = "";
+      c.querySelector("#bookBtn").setAttribute("href", "#");
+      const ad = c.querySelector("#admin"); if(ad) ad.remove();
+      c.querySelectorAll(".nav").forEach(n => n.removeAttribute("disabled"));
+      await art.publish("<!DOCTYPE html>\n" + c.outerHTML);
+    }catch(err){
+      note.textContent = "Could not save. Please try again."; $("saveBtn").disabled = false;
+    }
+  }
+  function enableAdmin(){
+    admin = true;
+    const bar = document.createElement("div"); bar.id = "admin"; bar.className = "admin";
+    bar.innerHTML = '<p><strong>Owner mode.</strong> Tap a date to switch it: Available, Booked, Unavailable. Only you see this bar.</p><div><button class="btn" id="saveBtn" type="button" disabled>Save changes</button><span id="adminNote"></span></div>';
+    document.querySelector(".cal").prepend(bar);
+    $("saveBtn").onclick = save;
+  }
+  (async () => {
+    try{
+      if(!window.claude) return;
+      const u = await claude.use("user");
+      if(u && u.canEdit()) enableAdmin();
+    }catch(e){}
+  })();
+})();
+</script>
+</body>
+</html>
